@@ -1,10 +1,11 @@
 <!doctype html>
-
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Claudio's Christmas Jeopardy</title><style>
+<title>Claudio's Christmas Jeopardy</title>
+
+<style>
   :root{
     --bg:#060612;
     --panel: rgba(255,255,255,.06);
@@ -268,6 +269,223 @@
   .sectionTitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px;font-weight:1100}
   .mini{font-size:12px;color:var(--muted);font-weight:800}
 
+  .timerBox{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .time{font-size:34px;font-weight:1200;letter-spacing:1px;min-width:98px;text-align:right;text-shadow:0 0 16px rgba(0,229,255,.22)}
+  .time.warn{color:var(--gold)}
+  .time.danger{color:var(--red)}
+  .timerBtns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+
+  input[type="number"], input[type="text"], select{
+    background: rgba(0,0,0,.18);
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:12px;
+    padding:9px 10px;
+    color:var(--text);
+    outline:none;
+    font-weight:900;
+  }
+  input[type="number"]{width:120px}
+
+  .teams{display:grid;gap:10px}
+  .team{
+    display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
+    padding:10px;border-radius:16px;
+    border:1px solid rgba(255,255,255,.10);
+    background: var(--panel2);
+  }
+  .teamName{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-weight:1100}
+  .score{font-size:18px;font-weight:1200;color: rgba(0,229,255,.95);text-shadow:0 0 14px rgba(0,229,255,.18)}
+  .scoreBtns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+
+  /* Host */
+  .hostRow{display:grid;grid-template-columns: 138px 1fr;gap:12px;align-items:center}
+  .hostStage{
+    width:138px;height:138px;border-radius:24px;
+    background: radial-gradient(circle at 30% 20%, rgba(191,233,255,.22), transparent 55%),
+                radial-gradient(circle at 80% 20%, rgba(255,59,59,.20), transparent 55%),
+                radial-gradient(circle at 60% 90%, rgba(45,255,106,.16), transparent 55%),
+                rgba(0,0,0,.12);
+    border:1px solid rgba(255,255,255,.12);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow: 0 0 0 1px rgba(0,229,255,.10);
+    position:relative; overflow:hidden;
+  }
+  .hostStage:before{
+    content:"";
+    position:absolute; inset:-40%;
+    background: conic-gradient(from 90deg, transparent, rgba(0,229,255,.12), transparent, rgba(255,43,214,.12), transparent);
+    animation: spin 12s linear infinite;
+    opacity:.65;
+  }
+  .host{
+    width:124px;height:124px; position:relative; z-index:1;
+    animation: hostBob 2.3s ease-in-out infinite;
+    transform-origin: 50% 70%;
+    filter: drop-shadow(0 0 14px rgba(0,229,255,.20));
+  }
+  @keyframes hostBob{0%,100%{transform: translateY(0px)}50%{transform: translateY(-5px)}}
+  .host[data-mood="buzz"]{animation: hostBob 2.3s ease-in-out infinite, hostShake .20s ease-in-out 2;}
+  @keyframes hostShake{
+    0%,100%{transform: translateY(-5px) rotate(0deg)}
+    30%{transform: translateY(-5px) rotate(-6deg)}
+    70%{transform: translateY(-5px) rotate(6deg)}
+  }
+  .bubble{
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.12);
+    background: rgba(0,0,0,.18);
+    padding:10px 12px;
+    position:relative;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.04);
+    min-height:84px;
+  }
+  .bubble:before{
+    content:"";
+    position:absolute; left:-8px; top:26px;
+    width:16px;height:16px;
+    background: rgba(0,0,0,.18);
+    border-left:1px solid rgba(255,255,255,.12);
+    border-bottom:1px solid rgba(255,255,255,.12);
+    transform: rotate(45deg);
+  }
+  .bubbleTitle{font-weight:1100;color:var(--ice);letter-spacing:.2px}
+  .bubbleText{margin-top:4px;color:var(--muted);font-weight:800;font-size:13px;line-height:1.25}
+
+  /* Modals */
+  .modal{
+    position:fixed; inset:0;
+    background: rgba(0,0,0,.65);
+    display:none; align-items:center; justify-content:center;
+    padding:18px; z-index:60;
+    backdrop-filter: blur(6px);
+  }
+  .modal.show{display:flex}
+  .modalCard{
+    width:min(980px, 100%);
+    background: linear-gradient(180deg, rgba(18,18,74,.96), rgba(13,13,42,.96));
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:22px;
+    box-shadow: 0 0 0 1px rgba(0,229,255,.10), 0 30px 90px rgba(0,0,0,.65);
+    overflow:hidden;
+  }
+  .modalHead{
+    padding:14px 16px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    border-bottom:1px solid rgba(255,255,255,.10);
+    background: linear-gradient(90deg, rgba(255,59,59,.14), rgba(45,255,106,.10), rgba(0,229,255,.12));
+  }
+  .meta{font-weight:1100;letter-spacing:.4px}
+  .pill{
+    font-size:12px;font-weight:1100;
+    padding:6px 10px;border-radius:999px;
+    border:1px solid rgba(255,255,255,.18);
+    background: rgba(0,0,0,.18);
+    color:var(--muted);
+  }
+  .body{padding:18px 16px 16px;display:grid;gap:12px}
+  .clue{font-size:30px;font-weight:1200;line-height:1.12;text-shadow:0 0 18px rgba(255,43,214,.14), 0 0 18px rgba(0,229,255,.12)}
+  .answer{display:none;font-size:22px;font-weight:1100;color: rgba(45,255,106,.96);text-shadow:0 0 18px rgba(45,255,106,.18)}
+  .answer.show{display:block}
+  .modalActions{
+    display:flex;gap:10px;flex-wrap:wrap;
+    align-items:center;justify-content:space-between;
+    padding:14px 16px 16px;border-top:1px solid rgba(255,255,255,.10);
+  }
+  .hint{font-size:12px;color:var(--muted);line-height:1.3}
+  .judgeRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+  .judgeRow select{min-width:160px}
+
+  /* Setup modal */
+  .setupGrid{display:grid;gap:10px}
+  .setupRow{display:grid;grid-template-columns: 1fr 1fr; gap:10px}
+  @media(max-width:600px){.setupRow{grid-template-columns:1fr}}
+  .setupCard{
+    padding:12px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.18);
+  }
+
+  /* Festive Lane */
+  .festiveLane{
+    margin-top:12px;
+    height:132px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.10);
+    background:
+      radial-gradient(900px 160px at 20% 30%, rgba(255,59,59,.12), transparent 60%),
+      radial-gradient(900px 160px at 75% 40%, rgba(45,255,106,.10), transparent 60%),
+      linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.12));
+    position:relative;
+    overflow:hidden;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.04);
+  }
+  .lights{position:absolute; left:0; right:0; top:10px; height:18px; opacity:.85;}
+  .bulb{
+    position:absolute; top:0;
+    width:10px; height:14px; border-radius:999px;
+    box-shadow: 0 0 12px rgba(255,255,255,.20);
+    animation: twinkle 1.2s ease-in-out infinite;
+  }
+  .bulb:after{
+    content:"";
+    position:absolute; left:50%; top:-4px; width:8px; height:6px;
+    transform:translateX(-50%);
+    border-radius:4px;
+    background: rgba(255,255,255,.22);
+  }
+  @keyframes twinkle{
+    0%,100%{filter:brightness(1); transform: translateY(0)}
+    50%{filter:brightness(1.8); transform: translateY(1px)}
+  }
+
+  .sleighWrap{
+    position:absolute; left:-760px; top:44px;
+    width:760px; height:84px;
+    animation: sleighFly 7.2s linear infinite;
+    filter: drop-shadow(0 0 16px rgba(255,210,74,.22));
+  }
+  @keyframes sleighFly{
+    0%{transform: translateX(0) translateY(0) rotate(-1.5deg)}
+    45%{transform: translateX(55vw) translateY(-10px) rotate(1.5deg)}
+    100%{transform: translateX(170vw) translateY(0) rotate(-1.5deg)}
+  }
+
+  .snowmanSvg{
+    position:absolute; left:18px; bottom:10px;
+    width:88px; height:96px;
+    transform-origin: 50% 100%;
+    animation: snowBop 1.25s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(191,233,255,.18));
+    cursor:pointer;
+  }
+  @keyframes snowBop{
+    0%,100%{transform: rotate(-4deg) translateY(0)}
+    50%{transform: rotate(5deg) translateY(-4px)}
+  }
+  .snowmanSvg.fallen{animation:none; transform: rotate(16deg) translateY(8px);}
+  .ornamentSvg{
+    position:absolute; right:110px; top:-4px;
+    width:64px; height:88px;
+    transform-origin: 50% 0%;
+    animation: swing 1.6s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(255,43,214,.18));
+  }
+  @keyframes swing{0%,100%{transform: rotate(-8deg)}50%{transform: rotate(8deg)}}
+  .giftSvg{
+    position:absolute; right:18px; bottom:12px;
+    width:74px; height:74px;
+    animation: giftBounce .9s ease-in-out infinite;
+    filter: drop-shadow(0 0 14px rgba(0,229,255,.16));
+    cursor:pointer;
+  }
+  @keyframes giftBounce{0%,100%{transform: translateY(0)}50%{transform: translateY(-8px)}}
+  .confetti{
+    position:absolute; width:7px; height:7px; border-radius:2px;
+    pointer-events:none;
+    box-shadow: 0 0 8px rgba(255,255,255,.25);
+  }
+
   /* ===== TV MODE (Big screen readability) ===== */
   body.tv .wrap{max-width:1600px}
   body.tv h1{font-size:42px}
@@ -277,6 +495,10 @@
   body.tv .layout{grid-template-columns: 1fr; }
   body.tv .side{display:none;}          /* hide side panel on TV */
   body.tv .panel{padding:16px;}
+  body.tv .clue{font-size:42px}
+  body.tv .answer{font-size:30px}
+  body.tv .modalCard{width:min(1180px, 96vw)}
+  body.tv .hint{font-size:14px}
 
   /* ===== HOST MODE BAR (TV control overlay) ===== */
   .hostBar{
@@ -330,12 +552,19 @@
 
   /* Respect reduced motion */
   @media (prefers-reduced-motion: reduce){
-    .flake, .aurora, h1::before, h1::after{ animation: none !important; }
+    .flake, .aurora, .sleighWrap, .snowmanSvg, .ornamentSvg, .giftSvg, .bulb, h1::before, h1::after{
+      animation: none !important;
+    }
   }
-</style></head><body>
+</style>
+</head>
+
+<body>
   <div class="stars" aria-hidden="true"></div>
   <div class="aurora" aria-hidden="true"></div>
-  <div class="snow" id="snow" aria-hidden="true"></div>  <div class="wrap">
+  <div class="snow" id="snow" aria-hidden="true"></div>
+
+  <div class="wrap">
     <header>
       <div class="brand">
         <div class="badge" aria-hidden="true"></div>
@@ -343,139 +572,320 @@
           <h1>Claudio’s Christmas Jeopardy</h1>
           <div class="sub">May The Smartest Elf Win</div>
         </div>
-      </div><div class="topbar">
-    <button class="btn" id="btnSetup">Setup</button>
-    <button class="btn ghost" id="btnTV">TV Mode: OFF</button>
-    <button class="btn ghost" id="btnHostMode">Host Mode: OFF</button>
-    <button class="btn ghost" id="btnAuto">Auto Timer: OFF</button>
-    <button class="btn" id="btnLock">Lock Board: OFF</button>
-    <button class="btn gold" id="btnFinal">Final Jeopardy</button>
-    <button class="btn red" id="btnReset">Reset Game</button>
-  </div>
-</header>
+      </div>
 
-<div class="layout">
-  <section class="panel">
-    <div class="grid" id="board" aria-label="Jeopardy board"></div>
+      <div class="topbar">
+        <button class="btn" id="btnSetup">Setup</button>
+        <button class="btn ghost" id="btnTV">TV Mode: OFF</button>
+        <button class="btn ghost" id="btnHostMode">Host Mode: OFF</button>
+        <button class="btn" id="btnLock">Lock Board: OFF</button>
+        <button class="btn gold" id="btnFinal">Final Jeopardy</button>
+        <button class="btn red" id="btnReset">Reset Game</button>
+      </div>
+    </header>
 
-    <div class="hint" style="margin-top:12px;">
-      Remote tips: use D-pad to move tiles; press <b>Select/Enter</b> to open. Press <b>Back/Esc</b> to close.
-    </div>
-  </section>
+    <div class="layout">
+      <section class="panel">
+        <div class="grid" id="board" aria-label="Jeopardy board"></div>
 
-  <aside class="side">
-    <!-- Host / Timer / Buzzer / Music / Scoreboard panels are in the original enhanced version.
-         This canvas focuses on fixing the state initialization bug without altering your existing game logic. -->
-    <div class="panel">
-      <div class="sectionTitle">Side Panel <span class="mini">(placeholder)</span></div>
-      <div class="mini">If you previously had the full side-panel markup here, paste it back in — the fix below is JS-only.</div>
-    </div>
-  </aside>
-</div>
+        <div class="festiveLane" aria-hidden="true" id="lane">
+          <div class="lights" id="lights"></div>
 
-  </div>  <!-- HOST MODE BAR (TV overlay controls) -->  <div class="hostBar" id="hostBar" aria-label="Host controls">
-    <div class="cluster grow">
-      <div class="stat"><span class="small">Timer</span> <b id="barTime">0:20</b></div>
-      <button class="btn green" id="barStart">Start</button>
-      <button class="btn" id="barPause">Pause</button>
-      <button class="btn red" id="barReset">Reset</button>
-      <button class="btn" id="barBuzz">Buzz</button>
-      <button class="btn red" id="barTimeUp">Time’s Up</button>
-    </div>
-    <div class="cluster">
-      <button class="btn" id="barAuto">Auto: OFF</button>
-      <button class="btn" id="barReveal">Reveal</button>
-      <button class="btn red" id="barClose">Close</button>
-    </div>
-  </div>  <!-- AUDIO UNLOCK OVERLAY -->  <div class="unlock" id="unlock">
-    <div class="unlockCard">
-      <h2>Enable Sound</h2>
-      <p>
-        Some TV browsers block audio until you click once.
-        Hit the button below to enable buzzers + music.
-      </p>
-      <button class="btn green" id="unlockBtn">Enable Sound</button>
-      <div class="mini" style="margin-top:10px;">You can still play silently if you prefer.</div>
-    </div>
-  </div><script>
-  /**
-   * FIX: Initialize `state` BEFORE any code reads or writes to it.
-   *
-   * Your previous file referenced `state.autoMode = false;` in an "additions" block,
-   * but `state` didn't exist yet, causing:
-   *   ReferenceError: state is not defined
-   */
-  let state = { autoMode: false };
+          <!-- Sleigh + reindeer: extra detailing (metallic gradients, highlights, harness polish) -->
+          <div class="sleighWrap" id="sleighWrap">
+            <svg viewBox="0 0 900 140" width="760" height="84" aria-hidden="true">
+              <defs>
+                <linearGradient id="reinG" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="rgba(255,255,255,.45)"/>
+                  <stop offset="100%" stop-color="rgba(255,255,255,.10)"/>
+                </linearGradient>
+                <linearGradient id="sleighRed" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#ff3b3b"/>
+                  <stop offset="55%" stop-color="#d21b5d"/>
+                  <stop offset="100%" stop-color="#860048"/>
+                </linearGradient>
+                <linearGradient id="goldG" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#ffd24a"/>
+                  <stop offset="60%" stop-color="#ffb22b"/>
+                  <stop offset="100%" stop-color="#ff8a1a"/>
+                </linearGradient>
+                <radialGradient id="iceHi" cx="30%" cy="25%" r="70%">
+                  <stop offset="0%" stop-color="rgba(255,255,255,.60)"/>
+                  <stop offset="100%" stop-color="rgba(191,233,255,.20)"/>
+                </radialGradient>
+              </defs>
 
-  // --- The following functions are lightweight fallbacks so this file can run even
-  // --- if you haven't pasted the rest of your original enhanced script yet.
-  // --- When you paste your full script back in, these will be overwritten by your real implementations.
-  function hostSay(title, msg){
-    // no-op fallback (prevents errors if hostSay isn't present yet)
-    console.log(`[HOST] ${title}: ${msg}`);
-  }
-  function startTimer(){
-    // no-op fallback
-    console.log('[TIMER] startTimer()');
-  }
-  // If your original script defines openClue, it will override this fallback.
-  function openClue(){
-    console.log('[CLUE] openClue()');
-  }
+              <!-- harness lines -->
+              <path d="M340 80 C430 36, 620 34, 800 72" fill="none" stroke="url(#reinG)" stroke-width="3.2" stroke-linecap="round"/>
+              <path d="M340 86 C440 50, 630 48, 800 82" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="3.2" stroke-linecap="round"/>
 
-  // ===== Auto Timer Controls (safe even if the rest of the game logic is not yet present) =====
-  const btnAuto = document.getElementById('btnAuto');
-  const barAuto = document.getElementById('barAuto');
+              <!-- sleigh (behind/left) -->
+              <g transform="translate(230,20)">
+                <path d="M30 60 C24 36, 40 18, 64 22 C82 6, 118 16, 118 44 C136 50, 138 78, 116 84
+                         C100 96, 64 94, 42 84 C32 76, 32 70, 30 60Z"
+                      fill="rgba(191,233,255,.38)" stroke="rgba(255,255,255,.16)" stroke-width="2.4"/>
+                <path d="M10 82 C26 58, 92 52, 142 60 C168 64, 190 56, 212 38
+                         C216 64, 214 90, 200 100 C184 112, 124 114, 88 110 C44 106, 20 96, 10 82Z"
+                      fill="url(#sleighRed)" stroke="rgba(255,255,255,.18)" stroke-width="3.2"/>
+                <path d="M28 80 C54 60, 120 60, 164 68" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="5" stroke-linecap="round"/>
+                <path d="M20 104 C56 122, 150 124, 196 106" fill="none" stroke="url(#goldG)" stroke-width="8" stroke-linecap="round"/>
+                <path d="M24 110 C62 126, 146 128, 190 114" fill="none" stroke="rgba(255,210,74,.42)" stroke-width="4" stroke-linecap="round"/>
 
-  function setAuto(on){
-    state.autoMode = !!on;
-    if(btnAuto) btnAuto.textContent = `Auto Timer: ${state.autoMode ? 'ON' : 'OFF'}`;
-    if(barAuto) barAuto.textContent = `Auto: ${state.autoMode ? 'ON' : 'OFF'}`;
-    hostSay(
-      'Auto Mode',
-      state.autoMode ? 'Timer starts as soon as a clue opens.' : 'Manual timer control restored.'
-    );
-  }
+                <!-- “Santa face” lantern -->
+                <circle cx="88" cy="50" r="14" fill="rgba(255,240,200,.92)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+                <circle cx="84" cy="48" r="2.2" fill="#0b0b14"/>
+                <circle cx="94" cy="48" r="2.2" fill="#0b0b14"/>
+                <path d="M82 56 C88 62, 92 62, 98 56" stroke="rgba(0,0,0,.35)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M76 62 C84 72, 92 72, 100 62" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="6" stroke-linecap="round"/>
+                <circle cx="88" cy="32" r="10" fill="rgba(255,59,59,.92)"/>
+                <circle cx="98" cy="28" r="5.8" fill="rgba(191,233,255,.95)" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
 
-  btnAuto?.addEventListener('click', ()=> setAuto(!state.autoMode));
-  barAuto?.addEventListener('click', ()=> setAuto(!state.autoMode));
+                <!-- highlight sheen -->
+                <path d="M34 72 C70 54, 130 54, 178 70" fill="none" stroke="url(#iceHi)" stroke-width="6" stroke-linecap="round" opacity=".55"/>
+              </g>
 
-  // Hook into openClue to auto-start timer
-  const _openClue = openClue;
-  openClue = function(c,i){
-    _openClue(c,i);
-    if(state.autoMode) startTimer();
-  };
+              <!-- reindeer (ahead/right) -->
+              <g transform="translate(540,10)">
+                <!-- animated bob using CSS on group -->
+                <g class="reindeer" transform="translate(0,22)">
+                  <ellipse cx="70" cy="48" rx="42" ry="24" fill="rgba(191,233,255,.32)" stroke="rgba(255,255,255,.14)" stroke-width="2"/>
+                  <path d="M92 44 C102 18, 136 22, 138 46 C140 72, 108 74, 102 56" fill="rgba(191,233,255,.40)" stroke="rgba(255,255,255,.14)" stroke-width="2"/>
+                  <path d="M124 18 L118 6 M128 18 L138 6 M120 12 L112 2" stroke="rgba(255,255,255,.36)" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="128" cy="44" r="2.6" fill="#0b0b14"/>
+                  <circle cx="144" cy="54" r="4.6" fill="rgba(255,59,59,.96)"/>
+                  <path d="M44 62 L34 88 M62 66 L56 92 M78 66 L76 94 M98 62 L104 88"
+                        stroke="rgba(255,255,255,.26)" stroke-width="6" stroke-linecap="round"/>
+                  <path d="M38 46 C55 34, 90 34, 112 48" fill="none" stroke="rgba(255,210,74,.78)" stroke-width="3" stroke-linecap="round"/>
+                  <path d="M52 52 C62 58, 74 58, 84 52" fill="none" stroke="rgba(0,0,0,.22)" stroke-width="3" stroke-linecap="round"/>
+                </g>
+                <g class="reindeer" transform="translate(130,34)" opacity=".92">
+                  <ellipse cx="70" cy="48" rx="42" ry="24" fill="rgba(191,233,255,.28)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+                  <path d="M92 44 C102 18, 136 22, 138 46 C140 72, 108 74, 102 56" fill="rgba(191,233,255,.34)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+                  <path d="M124 18 L118 6 M128 18 L138 6 M120 12 L112 2" stroke="rgba(255,255,255,.30)" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="128" cy="44" r="2.6" fill="#0b0b14"/>
+                  <circle cx="144" cy="54" r="4.2" fill="rgba(255,59,59,.90)"/>
+                  <path d="M44 62 L34 88 M62 66 L56 92 M78 66 L76 94 M98 62 L104 88"
+                        stroke="rgba(255,255,255,.22)" stroke-width="6" stroke-linecap="round"/>
+                  <path d="M38 46 C55 34, 90 34, 112 48" fill="none" stroke="rgba(255,210,74,.70)" stroke-width="3" stroke-linecap="round"/>
+                </g>
+                <g class="reindeer" transform="translate(260,24)" opacity=".86">
+                  <ellipse cx="70" cy="48" rx="42" ry="24" fill="rgba(191,233,255,.24)" stroke="rgba(255,255,255,.10)" stroke-width="2"/>
+                  <path d="M92 44 C102 18, 136 22, 138 46 C140 72, 108 74, 102 56" fill="rgba(191,233,255,.28)" stroke="rgba(255,255,255,.10)" stroke-width="2"/>
+                  <path d="M124 18 L118 6 M128 18 L138 6 M120 12 L112 2" stroke="rgba(255,255,255,.26)" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="128" cy="44" r="2.6" fill="#0b0b14"/>
+                  <circle cx="144" cy="54" r="4.0" fill="rgba(255,59,59,.86)"/>
+                  <path d="M44 62 L34 88 M62 66 L56 92 M78 66 L76 94 M98 62 L104 88"
+                        stroke="rgba(255,255,255,.20)" stroke-width="6" stroke-linecap="round"/>
+                  <path d="M38 46 C55 34, 90 34, 112 48" fill="none" stroke="rgba(255,210,74,.62)" stroke-width="3" stroke-linecap="round"/>
+                </g>
+              </g>
+            </svg>
+          </div>
 
-  // Keyboard: A toggles auto
-  document.addEventListener('keydown', (e)=>{
-    if(e.key?.toLowerCase() === 'a') setAuto(!state.autoMode);
-  });
+          <!-- Snowman -->
+          <svg class="snowmanSvg" id="snowman" viewBox="0 0 100 110" aria-hidden="true">
+            <defs>
+              <radialGradient id="snowGlow" cx="30%" cy="20%" r="70%">
+                <stop offset="0%" stop-color="rgba(255,255,255,.95)"/>
+                <stop offset="100%" stop-color="rgba(191,233,255,.75)"/>
+              </radialGradient>
+            </defs>
+            <circle cx="50" cy="78" r="26" fill="url(#snowGlow)" stroke="rgba(255,255,255,.18)" stroke-width="3"/>
+            <circle cx="50" cy="48" r="20" fill="url(#snowGlow)" stroke="rgba(255,255,255,.18)" stroke-width="3"/>
+            <path d="M30 56 C40 64, 60 64, 70 56" stroke="rgba(255,59,59,.90)" stroke-width="8" stroke-linecap="round" fill="none"/>
+            <path d="M60 58 C66 64, 66 76, 56 80" stroke="rgba(255,59,59,.85)" stroke-width="8" stroke-linecap="round" fill="none"/>
+            <circle cx="42" cy="44" r="2.8" fill="#0b0b14"/>
+            <circle cx="58" cy="44" r="2.8" fill="#0b0b14"/>
+            <path d="M50 48 L74 54 L50 58 Z" fill="rgba(255,210,74,.95)" stroke="rgba(0,0,0,.18)" stroke-width="2"/>
+            <path d="M40 56 C46 60, 54 60, 60 56" stroke="rgba(0,0,0,.30)" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <circle cx="50" cy="72" r="3" fill="rgba(0,0,0,.35)"/>
+            <circle cx="50" cy="84" r="3" fill="rgba(0,0,0,.35)"/>
+            <circle cx="50" cy="96" r="3" fill="rgba(0,0,0,.35)"/>
+            <path d="M26 70 C14 66, 10 56, 18 50" stroke="rgba(90,60,30,.70)" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <path d="M74 70 C86 66, 90 56, 82 50" stroke="rgba(90,60,30,.70)" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <rect x="34" y="18" width="32" height="18" rx="6" fill="rgba(0,0,0,.55)"/>
+            <rect x="28" y="32" width="44" height="8" rx="6" fill="rgba(0,0,0,.55)"/>
+            <rect x="30" y="30" width="40" height="4" rx="4" fill="rgba(255,43,214,.55)"/>
+          </svg>
 
-  // Keep buttons in sync after init
-  setAuto(state.autoMode);
+          <!-- Ornament -->
+          <svg class="ornamentSvg" viewBox="0 0 90 125" aria-hidden="true">
+            <defs>
+              <radialGradient id="ornHi" cx="30%" cy="25%" r="70%">
+                <stop offset="0%" stop-color="rgba(255,255,255,.60)"/>
+                <stop offset="55%" stop-color="rgba(255,43,214,.85)"/>
+                <stop offset="100%" stop-color="rgba(70,0,120,.95)"/>
+              </radialGradient>
+              <linearGradient id="capG" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="rgba(255,210,74,.95)"/>
+                <stop offset="100%" stop-color="rgba(255,159,43,.85)"/>
+              </linearGradient>
+            </defs>
 
-  // ===== Minimal runtime tests (console assertions) =====
-  // These are not unit tests in a runner, but they do protect against regressions.
-  (function runSelfTests(){
-    try{
-      console.assert(typeof state === 'object' && state !== null, 'state should be an object');
-      console.assert('autoMode' in state, 'state.autoMode should exist');
+            <path d="M45 2 L45 28" stroke="rgba(255,255,255,.30)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M33 28 C35 18, 55 18, 57 28" fill="url(#capG)" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
+            <rect x="30" y="28" width="30" height="16" rx="6" fill="url(#capG)" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
 
-      const before = state.autoMode;
-      setAuto(!before);
-      console.assert(state.autoMode === !before, 'setAuto should toggle state.autoMode');
-      setAuto(before);
-      console.assert(state.autoMode === before, 'setAuto should restore state.autoMode');
+            <circle cx="45" cy="82" r="34" fill="url(#ornHi)" stroke="rgba(255,255,255,.20)" stroke-width="3"/>
+            <path d="M28 74 C35 58, 55 58, 62 74" stroke="rgba(255,255,255,.22)" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <path d="M24 92 C36 104, 54 104, 66 92" stroke="rgba(0,229,255,.22)" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <circle cx="60" cy="88" r="5" fill="rgba(255,210,74,.80)"/>
+          </svg>
 
-      console.log('%cSelf-tests passed ✔', 'font-weight:900');
-    }catch(err){
-      console.error('Self-tests failed:', err);
-    }
-  })();
-</script><!--
-  IMPORTANT:
-  Paste your full original enhanced script BELOW this comment (or merge it into the script above)
-  but keep the `let state = { autoMode: false };` line near the top.
---></body>
-</html>
+          <!-- Gift -->
+          <svg class="giftSvg" id="gift" viewBox="0 0 120 120" aria-hidden="true">
+            <defs>
+              <linearGradient id="boxG" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="rgba(45,255,106,.95)"/>
+                <stop offset="100%" stop-color="rgba(0,229,255,.55)"/>
+              </linearGradient>
+              <linearGradient id="ribG" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="rgba(255,59,59,.95)"/>
+                <stop offset="100%" stop-color="rgba(255,43,214,.65)"/>
+              </linearGradient>
+              <radialGradient id="shine" cx="30%" cy="25%" r="70%">
+                <stop offset="0%" stop-color="rgba(255,255,255,.35)"/>
+                <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+              </radialGradient>
+            </defs>
+
+            <rect x="22" y="46" width="76" height="60" rx="16" fill="url(#boxG)" stroke="rgba(255,255,255,.18)" stroke-width="3"/>
+            <rect x="20" y="38" width="80" height="18" rx="12" fill="rgba(255,255,255,.10)" stroke="rgba(255,255,255,.14)" stroke-width="2"/>
+
+            <rect x="56" y="38" width="8" height="68" rx="7" fill="url(#ribG)"/>
+            <rect x="22" y="72" width="76" height="9" rx="8" fill="url(#ribG)"/>
+
+            <path d="M60 38 C48 34, 44 26, 52 24 C60 22, 62 30, 60 38Z" fill="rgba(255,210,74,.92)" stroke="rgba(0,0,0,.14)" stroke-width="2"/>
+            <path d="M60 38 C72 34, 76 26, 68 24 C60 22, 58 30, 60 38Z" fill="rgba(255,210,74,.92)" stroke="rgba(0,0,0,.14)" stroke-width="2"/>
+
+            <ellipse cx="46" cy="70" rx="26" ry="20" fill="url(#shine)"/>
+          </svg>
+        </div>
+
+        <div class="hint" style="margin-top:12px;">
+          Remote tips: use D-pad to move tiles; press <b>Select/Enter</b> to open. Press <b>Back/Esc</b> to close.
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="panel">
+          <div class="sectionTitle">
+            <span>Host</span>
+            <span class="mini">Elf MC</span>
+          </div>
+
+          <div class="hostRow">
+            <div class="hostStage">
+              <svg class="host" id="host" viewBox="0 0 140 140" aria-label="Animated elf host" data-mood="happy">
+                <defs>
+                  <radialGradient id="faceG" cx="30%" cy="25%" r="80%">
+                    <stop offset="0%" stop-color="rgba(255,240,200,.96)"/>
+                    <stop offset="100%" stop-color="rgba(255,200,120,.90)"/>
+                  </radialGradient>
+                  <linearGradient id="hatG" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="rgba(255,59,59,.96)"/>
+                    <stop offset="100%" stop-color="rgba(255,43,214,.55)"/>
+                  </linearGradient>
+                </defs>
+
+                <path d="M28 78 C10 70, 12 96, 30 90 Z" fill="url(#faceG)" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
+                <path d="M112 78 C130 70, 128 96, 110 90 Z" fill="url(#faceG)" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
+
+                <g id="hat" transform="translate(0,0)">
+                  <path d="M40 58 C50 18, 96 18, 104 60 C90 54, 56 54, 40 58Z"
+                        fill="url(#hatG)" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
+                  <path d="M38 60 C54 48, 90 48, 106 62" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="4" stroke-linecap="round"/>
+                  <circle cx="112" cy="48" r="10" fill="rgba(191,233,255,.95)" stroke="rgba(255,255,255,.22)" stroke-width="2"/>
+                </g>
+
+                <path d="M42 78 C48 62, 60 58, 70 62 C80 58, 92 62, 98 78
+                         C90 74, 82 74, 70 80 C58 74, 50 74, 42 78Z"
+                      fill="rgba(90,60,30,.80)"/>
+
+                <circle cx="70" cy="84" r="34" fill="url(#faceG)" stroke="rgba(255,255,255,.16)" stroke-width="2"/>
+
+                <circle cx="50" cy="90" r="8" fill="rgba(255,59,59,.16)"/>
+                <circle cx="90" cy="90" r="8" fill="rgba(255,59,59,.16)"/>
+
+                <g id="eyes">
+                  <ellipse cx="58" cy="80" rx="5" ry="7" fill="#0b0b14"/>
+                  <ellipse cx="82" cy="80" rx="5" ry="7" fill="#0b0b14"/>
+                  <circle cx="56" cy="78" r="1.6" fill="rgba(255,255,255,.65)"/>
+                  <circle cx="80" cy="78" r="1.6" fill="rgba(255,255,255,.65)"/>
+                  <rect class="lid" x="51" y="72" width="14" height="16" fill="url(#faceG)" style="opacity:0"/>
+                  <rect class="lid" x="75" y="72" width="14" height="16" fill="url(#faceG)" style="opacity:0"/>
+                </g>
+
+                <path d="M52 70 C56 66, 60 66, 64 70" stroke="rgba(0,0,0,.45)" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path d="M76 70 C80 66, 84 66, 88 70" stroke="rgba(0,0,0,.45)" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+                <path d="M68 86 C70 88, 72 88, 74 86" stroke="rgba(0,0,0,.35)" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+                <path id="mouth" d="M56 100 C64 110, 76 110, 84 100" fill="none" stroke="#0b0b14" stroke-width="5" stroke-linecap="round"/>
+
+                <path d="M50 122 L70 136 L90 122" fill="none" stroke="rgba(45,255,106,.85)" stroke-width="6" stroke-linecap="round"/>
+                <circle cx="70" cy="134" r="5" fill="rgba(255,210,74,.95)"/>
+              </svg>
+            </div>
+
+            <div class="bubble">
+              <div class="bubbleTitle" id="hostTitle">Welcome!</div>
+              <div class="bubbleText" id="hostText">Pick a category and let’s jingle these points!</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="sectionTitle">
+            <span>Timer</span>
+            <span class="mini">Resets per clue</span>
+          </div>
+
+          <div class="timerBox">
+            <div class="time" id="time">0:20</div>
+            <div class="timerBtns">
+              <button class="btn green" id="timerStart">Start</button>
+              <button class="btn" id="timerPause">Pause</button>
+              <button class="btn red" id="timerReset">Reset</button>
+            </div>
+          </div>
+
+          <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+            <span class="hint">Timer-only music can follow the clock.</span>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="mini">Seconds:</span>
+              <input id="timerSeconds" type="number" min="5" max="120" value="20" />
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="sectionTitle">
+            <span>Buzzer</span>
+            <span class="mini">Spacebar</span>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn" id="btnBuzz">BUZZ</button>
+            <button class="btn red" id="btnTimeUp">Time’s Up</button>
+          </div>
+          <div class="hint" style="margin-top:10px;">
+            If audio is blocked, click “Enable Sound” once.
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="sectionTitle">
+            <span>Background Music</span>
+            <span class="mini">Original loop</span>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <button class="btn green" id="musicPlay">Play</button>
+            <button class="btn red" id="musicStop">Stop</button>
+
+            <span class="mini">Vol</span>
+            <input id="musicVol" type="number" min="0" max="100" value="25" style="width:90px" />
+          </div>
+
+          <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+            <label class="mini" style="display:flex; ga
